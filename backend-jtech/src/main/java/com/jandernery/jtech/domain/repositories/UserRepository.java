@@ -11,4 +11,5 @@ public interface UserRepository {
     UserEntity createUser(UserEntity user);
     UserEntity findById(UUID id);
     UserEntity updateUser(UUID id, String name);
+    boolean existsByEmail(String email);
 }

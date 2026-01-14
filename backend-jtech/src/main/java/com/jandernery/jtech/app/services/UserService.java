@@ -37,4 +37,8 @@ public class UserService {
     public UserEntity updateUser(UpdateUserDTO updateUserDTO, UUID id){
         return userRepository.updateUser(id, updateUserDTO.name());
     }
+
+    public boolean userExistsByEmail(String email){
+        return userRepository.existsByEmail(email);
+    }
 }
