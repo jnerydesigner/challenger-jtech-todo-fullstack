@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -22,6 +23,9 @@ class UserServiceTest {
 
     @Mock
     UserRepository userRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     UserService userService;
@@ -46,7 +50,7 @@ class UserServiceTest {
         savedUser.setId(UUID.fromString("ae7847d4-8984-49db-971f-871ab3c3698c"));
         savedUser.setName(dto.name());
         savedUser.setEmail(dto.email());
-        savedUser.setPassword(dto.password());
+        savedUser.setPassword("$2a$10$hashFake");
 
         when(userRepository.save(any(UserEntity.class)))
                 .thenReturn(savedUser);
@@ -57,7 +61,7 @@ class UserServiceTest {
         assertNotNull(result.getId());
         assertEquals(dto.name(), result.getName());
         assertEquals(dto.email(), result.getEmail());
-        assertEquals(dto.password(), result.getPassword());
+        assertEquals("$2a$10$hashFake", result.getPassword());
 
         verify(userRepository).save(any(UserEntity.class));
 
