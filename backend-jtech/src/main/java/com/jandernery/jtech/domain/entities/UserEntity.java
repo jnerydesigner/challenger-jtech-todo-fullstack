@@ -1,0 +1,20 @@
+package com.jandernery.jtech.domain.entities;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
+
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class UserEntity {
+    private UUID id;
+    private String name;
+    private String email;
+    private String password;
+}
