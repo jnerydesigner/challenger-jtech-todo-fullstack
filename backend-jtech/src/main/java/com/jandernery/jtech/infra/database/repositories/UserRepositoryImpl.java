@@ -3,6 +3,7 @@ package com.jandernery.jtech.infra.database.repositories;
 
 import com.jandernery.jtech.domain.entities.UserEntity;
 import com.jandernery.jtech.domain.repositories.UserRepository;
+import com.jandernery.jtech.infra.database.entities.UserJpaEntity;
 import com.jandernery.jtech.infra.database.jpa.UserJpaRepository;
 import com.jandernery.jtech.infra.database.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -20,5 +21,12 @@ public class UserRepositoryImpl implements UserRepository {
         return userJpaRepository
                 .findByEmail(email)
                 .map(UserMapper::toDomain);
+    }
+
+    @Override
+    public UserEntity save(UserEntity user) {
+        UserJpaEntity userJpaEntity = UserMapper.toJpa(user);
+        UserJpaEntity userSave = userJpaRepository.save(userJpaEntity);
+        return UserMapper.toDomain(userSave);
     }
 }
