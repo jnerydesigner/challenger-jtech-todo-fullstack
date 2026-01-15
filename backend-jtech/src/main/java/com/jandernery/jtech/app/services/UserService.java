@@ -30,8 +30,7 @@ public class UserService {
     }
 
     public UserEntity getByEmail(String email){
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findByEmail(email);
     }
 
     public UserEntity updateUser(UpdateUserDTO updateUserDTO, UUID id){

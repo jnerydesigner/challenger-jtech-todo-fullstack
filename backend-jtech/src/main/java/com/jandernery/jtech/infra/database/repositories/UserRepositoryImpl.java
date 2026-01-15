@@ -19,10 +19,14 @@ public class UserRepositoryImpl implements UserRepository {
     private final UserJpaRepository userJpaRepository;
 
     @Override
-    public Optional<UserEntity> findByEmail(String email) {
-        return userJpaRepository
-                .findByEmail(email)
-                .map(UserMapper::toDomain);
+    public UserEntity findByEmail(String email) {
+        Optional<UserJpaEntity> userJpaEntity = userJpaRepository
+                .findByEmail(email);
+        if(userJpaEntity.isEmpty()){
+            throw new IllegalArgumentException("User not found");
+        }
+
+        return UserMapper.toDomain(userJpaEntity.get());
     }
 
     @Override

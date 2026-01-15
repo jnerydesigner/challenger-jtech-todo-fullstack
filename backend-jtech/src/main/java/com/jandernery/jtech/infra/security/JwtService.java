@@ -1,5 +1,6 @@
 package com.jandernery.jtech.infra.security;
 
+import com.jandernery.jtech.app.dtos.AuthUserDTO;
 import com.jandernery.jtech.domain.entities.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -53,6 +55,21 @@ public class JwtService {
 
     public String extractSubject(String token) {
         return parseClaims(token).getSubject();
+    }
+
+    public AuthUserDTO extractAuthUser(String token){
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return new AuthUserDTO(
+                UUID.fromString(claims.get("userId", String.class)),
+                claims.getSubject(),
+                claims.get("name", String.class),
+                claims.get("roles", List.class)
+        );
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {

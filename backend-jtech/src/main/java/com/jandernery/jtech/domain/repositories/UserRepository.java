@@ -7,7 +7,7 @@ import java.util.UUID;
 
 
 public interface UserRepository {
-    Optional<UserEntity> findByEmail(String email);
+    UserEntity findByEmail(String email);
     UserEntity createUser(UserEntity user);
     UserEntity findById(UUID id);
     UserEntity updateUser(UUID id, String name);
