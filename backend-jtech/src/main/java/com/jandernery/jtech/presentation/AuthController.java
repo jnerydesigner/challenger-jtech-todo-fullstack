@@ -39,6 +39,7 @@ public class AuthController {
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
                 .secure(false)
+                .sameSite("Lax")
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60)
                 .build();
