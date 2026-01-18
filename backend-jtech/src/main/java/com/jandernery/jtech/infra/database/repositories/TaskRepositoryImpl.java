@@ -1,6 +1,7 @@
 package com.jandernery.jtech.infra.database.repositories;
 
 import com.jandernery.jtech.app.dtos.tasks.BuildUserDTO;
+import com.jandernery.jtech.app.dtos.tasks.UpdateStatusTaskDTO;
 import com.jandernery.jtech.domain.entities.TaskEntity;
 import com.jandernery.jtech.domain.entities.UserEntity;
 import com.jandernery.jtech.domain.repositories.TaskRepository;
@@ -51,7 +52,7 @@ public class TaskRepositoryImpl implements TaskRepository {
         ModelMapper modelMapper = new ModelMapper();
         List<TaskJpaEntity> taskJpaEntities = taskJpaRepository.findByUserId(userId);
         if (taskJpaEntities.isEmpty()) {
-            throw new RuntimeException("Usuário não possui listas");
+            throw new RuntimeException("Usuário não encontrado");
         }
 
 
@@ -59,8 +60,31 @@ public class TaskRepositoryImpl implements TaskRepository {
         Optional<UserJpaEntity> user = userJpaRepository.findByIdWithTasks(userId);
 
         if(user.isEmpty()){
-            throw new RuntimeException("Usuário não possui listas");
+            throw new RuntimeException("Usuário não encontrado");
         }
+
+        return UserMapper.toResponse(user.get());
+    }
+
+    @Override
+    public BuildUserDTO updateTaskStatus(UUID taskId, UUID userId) {
+        Optional<UserJpaEntity> user = userJpaRepository.findByIdWithTasks(userId);
+
+        if(user.isEmpty()){
+            throw new RuntimeException("Usuário não encontrado");
+        }
+
+        Optional<TaskJpaEntity> task = taskJpaRepository.findById(taskId);
+
+        if(task.isEmpty()){
+            throw new RuntimeException("Tarefa não encontrada");
+        }
+
+        TaskJpaEntity taskEntity = task.get();
+
+        taskEntity.setCompleted(!taskEntity.isCompleted());
+
+        taskJpaRepository.save(task.get());
 
         return UserMapper.toResponse(user.get());
     }

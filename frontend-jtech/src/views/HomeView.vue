@@ -14,7 +14,7 @@
                 {{ task.completed ? 'Ativo' : 'Inativo' }}
               </span>
 
-              <ToggleSwitch v-model="task.completed" />
+              <ToggleSwitch v-model="task.completed" @update:modelValue="() => onToggle(task.id)" />
 
               <button @click="editTask(task.id)" class="px-4 py-2 rounded-md bg-(--primary)
                      text-white text-sm hover:bg-(--primary-hover)
@@ -50,6 +50,14 @@ onMounted(async () => {
     console.error(e)
   }
 })
+
+async function onToggle(taskId: string) {
+  try {
+    await taskStore.toogleStatusTask(taskId)
+  } catch (e) {
+    console.error('Erro ao alterar status', e)
+  }
+}
 
 function editTask(id: string) {
   console.log('Editar task', id)

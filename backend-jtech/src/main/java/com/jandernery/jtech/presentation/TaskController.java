@@ -2,10 +2,14 @@ package com.jandernery.jtech.presentation;
 
 import com.jandernery.jtech.app.dtos.*;
 import com.jandernery.jtech.app.dtos.tasks.BuildUserDTO;
+import com.jandernery.jtech.app.dtos.tasks.UpdateStatusTaskDTO;
 import com.jandernery.jtech.app.services.TaskService;
 import com.jandernery.jtech.app.services.UserService;
 import com.jandernery.jtech.domain.entities.TaskEntity;
 import com.jandernery.jtech.domain.entities.UserEntity;
+
+import java.util.UUID;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
@@ -60,5 +64,19 @@ public class TaskController {
                 responseUserDTO
 
         );
+    }
+
+    @PatchMapping("/status/{taskId}")
+    public ResponseEntity<BuildUserDTO> updateTask(
+            @PathVariable UUID taskId,
+            Authentication authentication
+    ){
+        User user = (User) authentication.getPrincipal();
+        String email = user.getUsername();
+        UserEntity userEntity = userService.getByEmail(email);
+
+        BuildUserDTO buildUserDTO = taskService.updateTaskStatus(taskId, userEntity.getId());
+
+        return ResponseEntity.ok(buildUserDTO);
     }
 }

@@ -16,16 +16,16 @@
         <div class="flex items-center gap-4 cursor-pointer select-none" @click="toggleMenu">
           <div class="text-right">
             <p class="text-sm font-semibold text-white">
-              {{ user.name }}
+              {{ userStore.user?.name }}
             </p>
             <p class="text-xs text-slate-300">
-              {{ user.email }}
+              {{ userStore.user?.email }}
             </p>
           </div>
 
           <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500
                    flex items-center justify-center text-white font-semibold">
-            {{ user.initials }}
+            {{ initials }}
           </div>
         </div>
 
@@ -46,19 +46,16 @@
 
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref } from 'vue'
+import { onMounted, onBeforeUnmount, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { getInitials } from '@/helper/get-initials'
 import { logout } from '@/services/logout'
+import { useUserStore } from '@/stores/user.store'
 
-
+const userStore = useUserStore()
 const router = useRouter()
 
-const user = ref({
-  name: '',
-  email: '',
-  initials: '',
-})
+const initials = computed(() => getInitials(userStore.user?.name || ''))
 
 const isOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
@@ -79,14 +76,12 @@ function closeMenu(event: MouseEvent) {
 function logoutApp() {
   logout()
 
+  userStore.clearUser()
+
   router.push('/login')
 }
 
 onMounted(() => {
-  user.value.name = localStorage.getItem('user_name') || ''
-  user.value.email = localStorage.getItem('user_email') || ''
-  user.value.initials = getInitials(user.value.name)
-
   document.addEventListener('click', closeMenu)
 })
 
