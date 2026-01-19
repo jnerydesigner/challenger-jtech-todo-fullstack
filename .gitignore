@@ -1,4 +1,4 @@
 
 .backend-jtech/src/main/resources/application.properties
-/backend-jtech/src/main/resources
-*.properties
+/backend-jtech/src/main/resources/*
+
