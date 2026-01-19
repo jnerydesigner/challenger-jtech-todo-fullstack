@@ -1,4 +1,4 @@
-import { tasksFindAll, toogleTaskStatus } from '@/services/tasks'
+import { createNewTask, deleteTask, tasksFindAll, toogleTaskStatus, updateTask } from '@/services/tasks'
 import type { UserWithTasks } from '@/types/tasks.type'
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
@@ -26,10 +26,40 @@ export const useTaskStore = defineStore('tasks', () => {
     }
   }
 
+  async function createTask(title: string) {
+    try {
+      const response = await createNewTask(title);
+      tasks.value = response
+    } catch (error) {
+      console.error('Erro ao buscar tarefas:', error)
+    }
+  }
+
+  async function updateTaskStore(id: string, title: string) {
+    try {
+      const response = await updateTask(id, title);
+      tasks.value = response
+    } catch (error) {
+      console.error('Erro ao buscar tarefas:', error)
+    }
+  }
+
+  async function deleteTaskStore(id: string) {
+    try {
+      const response = await deleteTask(id);
+      tasks.value = response
+    } catch (error) {
+      console.error('Erro ao buscar tarefas:', error)
+    }
+  }
+
   return {
     tasks,
     tasksComputed,
     fetchTasks,
-    toogleStatusTask
+    toogleStatusTask,
+    createTask,
+    updateTaskStore,
+    deleteTaskStore
   }
 })
