@@ -16,10 +16,10 @@
         <div class="flex items-center gap-4 cursor-pointer select-none" @click="toggleMenu">
           <div class="text-right">
             <p class="text-sm font-semibold text-white">
-              {{ userStore.user?.name }}
+              {{ userDetails?.name }}
             </p>
             <p class="text-xs text-slate-300">
-              {{ userStore.user?.email }}
+              {{ userDetails?.email }}
             </p>
           </div>
 
@@ -46,18 +46,20 @@
 
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, computed } from 'vue'
+import { onMounted, onBeforeUnmount, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getInitials } from '@/helper/get-initials'
 import { logout } from '@/services/logout'
 import { useUserStore } from '@/stores/user.store'
+import type { UserLoginType } from '@/types/user-login.type'
 
 const userStore = useUserStore()
 const router = useRouter()
 
-const initials = computed(() => getInitials(userStore.user?.name || ''))
+const initials = ref('')
 
 const isOpen = ref(false)
+const userDetails = ref<UserLoginType | null>(null)
 const dropdownRef = ref<HTMLElement | null>(null)
 
 function toggleMenu() {
@@ -82,6 +84,14 @@ function logoutApp() {
 }
 
 onMounted(() => {
+  const user = localStorage.getItem('user-login')
+  if (user) {
+    const userLogin: UserLoginType = JSON.parse(user)
+    userDetails.value = userLogin
+    initials.value = getInitials(userLogin.name)
+    userStore.setUser(userLogin)
+    userStore.isAuthenticated = true
+  }
   document.addEventListener('click', closeMenu)
 })
 

@@ -21,7 +21,7 @@
         </div>
 
         <button type="submit"
-          class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition cursor-pointer"
+          class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           :disabled="loading">
           {{ loading ? 'Entrando...' : 'Entrar' }}
         </button>
@@ -35,11 +35,11 @@
 </template>
 
 <script setup lang="ts">
-import { login } from '@/services/login'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user.store'
-
+import { login } from '@/services/login'
+import type { AxiosError } from 'axios'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -47,19 +47,41 @@ const userStore = useUserStore()
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
-const error = ref(null)
+const error = ref('')
 
 async function handleLogin() {
-  error.value = null
+  error.value = ''
   loading.value = true
 
+  try {
+    const responseLogin = await login(email.value, password.value)
 
-  const user = await login(email.value, password.value);
+    console.log('Login response:', responseLogin)
+    localStorage.setItem('user-login', JSON.stringify(responseLogin))
 
-  userStore.setUser(user)
+    // Salva dados do usuário no store (SEM o token)
+    userStore.setUser({
+      id: responseLogin.id,
+      name: responseLogin.name,
+      email: responseLogin.email
+    })
 
+    router.push({ name: 'dashboard' })
+  } catch (e) {
+    const errorObj = e as AxiosError
+    console.error('Erro no login:', errorObj)
 
-  router.push({ name: 'home' })
-
+    if (errorObj.response?.status === 401 || errorObj.response?.status === 403) {
+      error.value = 'Email ou senha inválidos'
+    } else if (errorObj.response?.status === 500) {
+      error.value = 'Erro no servidor. Tente novamente.'
+    } else if (!errorObj.response) {
+      error.value = 'Erro de conexão. Verifique sua internet.'
+    } else {
+      error.value = 'Erro ao fazer login. Tente novamente.'
+    }
+  } finally {
+    loading.value = false
+  }
 }
 </script>

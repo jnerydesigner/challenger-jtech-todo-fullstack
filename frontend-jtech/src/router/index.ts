@@ -14,7 +14,7 @@ const router = createRouter({
       children: [
         {
           path: '',
-          name: 'home',
+          name: 'dashboard',
           component: HomeView
         }
       ]
@@ -28,23 +28,28 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
+  const requiresAuth = to.meta.requiresAuth
 
-
-  if (!to.meta.requiresAuth) {
-    if (to.name === 'login' && userStore.isAuthenticated) {
-      return { name: 'home' }
+  if (requiresAuth) {
+    if (userStore.isAuthenticated && userStore.user) {
+      next()
+    } else {
+      try {
+        await userStore.loadSession()
+        next()
+      } catch (error) {
+        next({ name: 'login', query: { redirect: to.fullPath } })
+      }
     }
-    return true
+  } else {
+    if (to.name === 'login' && userStore.isAuthenticated && userStore.user) {
+      next({ name: 'dashboard' })
+    } else {
+      next()
+    }
   }
-
-  if (!userStore.isAuthenticated) {
-    return { name: 'login' }
-  }
-
-  return true
 })
-
 
 export default router
