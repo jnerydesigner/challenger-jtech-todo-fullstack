@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -36,8 +37,18 @@ public class AuthService {
         return issueTokens(user);
     }
 
-    private AuthResponseDTO issueTokens(UserEntity user){
-        String accessToken = jwtService.generateToken( user.getId().toString(), user);
+    private AuthResponseDTO issueTokens(UserEntity user) {
+
+        Map<String, Object> claims = Map.of(
+                "userId", user.getId().toString(),
+                "name", user.getName(),
+                "email", user.getEmail()
+        );
+
+        // 🔑 SUBJECT = EMAIL (ou username)
+        String accessToken =
+                jwtService.generateToken(user.getEmail(), claims);
+
         return new AuthResponseDTO(
                 user.getId(),
                 user.getName(),

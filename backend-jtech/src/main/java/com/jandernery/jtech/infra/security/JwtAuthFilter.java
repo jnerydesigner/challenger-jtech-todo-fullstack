@@ -6,10 +6,9 @@ import com.jandernery.jtech.app.dtos.error.ErrorResponseDTO;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,9 +19,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
+
+    private static final String TOKEN_COOKIE_NAME = "token";
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -30,93 +32,121 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     public JwtAuthFilter(
             JwtService jwtService,
-            UserDetailsService userDetailsService, ObjectMapper objectMapper) {
+            UserDetailsService userDetailsService,
+            ObjectMapper objectMapper
+    ) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
         this.objectMapper = objectMapper;
+        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+            FilterChain filterChain
+    ) throws ServletException, IOException {
+
         try {
-            if ("OPTIONS".equalsIgnoreCase(request.getMethod())
-                    || request.getServletPath().startsWith("/auth")) {
+            String token = extractTokenFromCookie(request);
+
+            // 🔒 Sem cookie → request segue como não autenticada
+            if (token == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            String jwt = extractTokenFromCookie(request);
-
-            if (jwt == null) {
+            // 🔒 Token inválido (assinatura, estrutura, etc.)
+            if (!jwtService.isTokenValid(token)) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            String username = jwtService.extractSubject(jwt);
+            // 🔒 Evita sobrescrever autenticação existente
+            if (SecurityContextHolder.getContext().getAuthentication() != null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-            if (username != null &&
-                    SecurityContextHolder.getContext().getAuthentication() == null) {
+            String username = jwtService.extractSubject(token);
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (username == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-                if (jwtService.isTokenValid(jwt, userDetails)) {
+            // 🔐 Só agora acessa o banco
+            UserDetails userDetails =
+                    userDetailsService.loadUserByUsername(username);
 
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            userDetails.getAuthorities());
+                            userDetails.getAuthorities()
+                    );
 
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource()
-                                    .buildDetails(request));
-
-                    SecurityContextHolder
-                            .getContext()
-                            .setAuthentication(authToken);
-                }
-            }
-
-            filterChain.doFilter(request, response);
-        } catch (ExpiredJwtException ex) {
-            SecurityContextHolder.clearContext();
-
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-
-            ErrorResponseDTO error = new ErrorResponseDTO(
-                    "AUTH",
-                    "TOKEN_EXPIRED",
-                    HttpServletResponse.SC_UNAUTHORIZED,
-                    LocalDateTime.now()
+            authentication.setDetails(
+                    new WebAuthenticationDetailsSource()
+                            .buildDetails(request)
             );
 
+            SecurityContextHolder
+                    .getContext()
+                    .setAuthentication(authentication);
 
-            objectMapper.registerModule(new JavaTimeModule());
-            response.getWriter().write(objectMapper.writeValueAsString(error));
+            filterChain.doFilter(request, response);
 
-
-
-
+        } catch (ExpiredJwtException ex) {
+            SecurityContextHolder.clearContext();
+            writeTokenExpiredResponse(response);
         }
-
-        System.out.println(
-                "Auth no contexto: " +
-                        SecurityContextHolder.getContext().getAuthentication()
-        );
     }
 
+    /**
+     * Extrai o JWT do cookie HTTP-only
+     */
     private String extractTokenFromCookie(HttpServletRequest request) {
-        if (request.getCookies() == null)
+        if (request.getCookies() == null) {
             return null;
-
-        for (var cookie : request.getCookies()) {
-            if ("token".equals(cookie.getName())) {
-                return cookie.getValue();
-            }
         }
-        return null;
+
+        return Arrays.stream(request.getCookies())
+                .filter(cookie -> TOKEN_COOKIE_NAME.equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Define quais rotas NÃO passam pelo filtro
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+
+        return path.startsWith("/auth")
+                || (path.equals("/users") && request.getMethod().equals("POST"));
+    }
+
+    /**
+     * Retorno padronizado para token expirado
+     */
+    private void writeTokenExpiredResponse(HttpServletResponse response)
+            throws IOException {
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+
+        ErrorResponseDTO error = new ErrorResponseDTO(
+                "AUTH",
+                "TOKEN_EXPIRED",
+                HttpServletResponse.SC_UNAUTHORIZED,
+                LocalDateTime.now()
+        );
+
+        response.getWriter()
+                .write(objectMapper.writeValueAsString(error));
     }
 }
