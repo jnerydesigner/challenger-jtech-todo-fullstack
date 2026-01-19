@@ -1,3 +1,5 @@
+![Image Challenge](./challenge.png)
+
 # Documentação do Sistema Todo Fullstack
 
 Este documento descreve o fluxo do sistema, a arquitetura backend/frontend, e como os componentes se integram.
