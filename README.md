@@ -2,7 +2,29 @@
 
 # Documentação do Sistema Todo Fullstack
 
-Este documento descreve o fluxo do sistema, a arquitetura backend/frontend, e como os componentes se integram.
+## Passos que foram dado para chegar a esse projeto.
+
+### Passo 1 - Login
+
+Essa parte foi desafiadora, não pelo fato de ter que fazer o login, mas sim na parte do backend, mas a integração com vue.js, foi complicada, pois a eu não tenho muita experiência, mas resolvi fazer de forma que o backend e frontend fossem integrados de forma que o backend fosse capaz de retornar os dados para o frontend e o frontend fosse capaz de enviar os dados para o backend, foi feito com Http Only Cookies, justamente para não termos que salvar o token no localStorage, e ainda não terminei, a intenção era expulsar o usuário da sessão caso ele não fizesse login.
+
+### Passo 2 - Criação de Tarefa
+
+Aqui foi mais simples, foi feito com um formulário que envia os dados para o backend, e o backend retorna os dados para o frontend, e o frontend atualiza a lista de tarefas.
+
+### Passo 3 - Listagem de Tarefa
+
+Aqui foi mais simples, foi feito com um formulário que envia os dados para o backend, e o backend retorna os dados para o frontend, e o frontend atualiza a lista de tarefas.
+
+### Passo 4 - Atualização de Tarefa
+
+Aqui foi mais simples, foi feito com um formulário que envia os dados para o backend, e o backend retorna os dados para o frontend, e o frontend atualiza a lista de tarefas.
+
+### Passo 5 - Exclusão de Tarefa
+
+Aqui foi mais simples, foi feito com um formulário que envia os dados para o backend, e o backend retorna os dados para o frontend, e o frontend atualiza a lista de tarefas.
+
+Essa é minha primeira vez mexendo com vuejs.
 
 ## 1. Fluxo do Sistema e Integração Backend-Frontend
 
