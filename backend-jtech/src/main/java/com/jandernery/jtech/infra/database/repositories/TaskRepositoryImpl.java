@@ -138,6 +138,21 @@ public class TaskRepositoryImpl implements TaskRepository {
         return findTasksGeneral(user.getId());
     }
 
+    @Override
+    public TaskEntity findTaskByIdAndUser(UUID taskId, String email) {
+        UserJpaEntity user = findUserJpa(email);
+
+        Optional<TaskJpaEntity> task = taskJpaRepository.findById(taskId);
+
+        if(task.isEmpty()){
+            throw new RuntimeException("Tarefa não encontrada");
+        }
+
+        TaskEntity taskEntity = TaskMapper.toDomain(task.get());
+
+        return taskEntity;
+    }
+
     private UserJpaEntity findUserJpa(String email){
         Optional<UserJpaEntity> userJpaEntity = userJpaRepository.findByEmail(email);
 

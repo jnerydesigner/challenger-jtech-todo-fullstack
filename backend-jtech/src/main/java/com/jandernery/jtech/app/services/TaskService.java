@@ -38,4 +38,8 @@ public class TaskService {
     public BuildUserDTO deleteTask(String email, UUID taskId) {
         return taskRepository.deleteTask(taskId, email);
     }
+
+    public TaskEntity getTaskById(UUID taskId, String email) {
+        return taskRepository.findTaskByIdAndUser(taskId, email);
+    }
 }

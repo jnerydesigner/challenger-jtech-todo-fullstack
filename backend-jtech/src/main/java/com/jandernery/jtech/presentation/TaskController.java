@@ -31,8 +31,7 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<BuildUserDTO> saveTask(
             @RequestBody CreateTaskDTO createTaskDTO,
-            Authentication authentication
-    ){
+            Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         String email = user.getUsername();
         UserEntity userEntity = userService.getByEmail(email);
@@ -43,35 +42,26 @@ public class TaskController {
     }
 
     @GetMapping
-    public ResponseEntity<BuildUserDTO> listAllTasks(Authentication authentication){
+    public ResponseEntity<BuildUserDTO> listAllTasks(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        System.out.println(user);
         String email = user.getUsername();
-        return ResponseEntity.ok(taskService.getAllTasks(user.getUsername()));
+        return ResponseEntity.ok(taskService.getAllTasks(email));
     }
 
-    private static ResponseTaskDTO getResponseTaskDTO(TaskEntity taskEntity) {
-        ResponseUserDTO responseUserDTO = new ResponseUserDTO(
-                taskEntity.getUser().getId(),
-                taskEntity.getUser().getName(),
-                taskEntity.getUser().getEmail()
-        );
-        return new ResponseTaskDTO(
-                taskEntity.getId(),
-                taskEntity.getTitle(),
-                taskEntity.getCreatedAt(),
-                taskEntity.getUpdatedAt(),
-                responseUserDTO
-
-        );
+    @GetMapping("/{taskId}")
+    public ResponseEntity<TaskEntity> getTaskById(
+            @PathVariable UUID taskId,
+            Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        String email = user.getUsername();
+        return ResponseEntity.ok(taskService.getTaskById(taskId, email));
     }
 
     @PatchMapping("/{taskId}")
     public ResponseEntity<BuildUserDTO> updateTask(
             @PathVariable UUID taskId,
             Authentication authentication,
-            @RequestBody TaskChangeTitleDTO taskChangeTitleDTO
-    ){
+            @RequestBody TaskChangeTitleDTO taskChangeTitleDTO) {
         User user = (User) authentication.getPrincipal();
         String email = user.getUsername();
 
@@ -85,8 +75,7 @@ public class TaskController {
     @PatchMapping("/status/{taskId}")
     public ResponseEntity<BuildUserDTO> updateTaskStatus(
             @PathVariable UUID taskId,
-            Authentication authentication
-    ){
+            Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         String email = user.getUsername();
         UserEntity userEntity = userService.getByEmail(email);
@@ -99,8 +88,7 @@ public class TaskController {
     @DeleteMapping("/{taskId}")
     public ResponseEntity<BuildUserDTO> deleteTask(
             @PathVariable UUID taskId,
-            Authentication authentication
-    ){
+            Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         String email = user.getUsername();
 

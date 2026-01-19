@@ -15,4 +15,6 @@ public interface TaskRepository {
     BuildUserDTO updateTaskTitle(UUID taskId, String email, String title);
 
     BuildUserDTO deleteTask(UUID taskId, String email);
+
+    TaskEntity findTaskByIdAndUser(UUID taskId, String email);
 }
