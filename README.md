@@ -122,5 +122,21 @@ services:
 Execute o comando no terminal na raiz do projeto (onde está o `docker-compose.yaml`):
 
 ```bash
+https://github.com/jnerydesigner/challenger-jtech-todo-fullstack.git
+
+cd challenger-jtech-todo-fullstack
+
+# Iniciar o banco de dados
+
 docker-compose up -d
+
+# Iniciar o backend
+
+cd backend-jtech
+./mvnw spring-boot:run
+
+# Iniciar o frontend
+
+cd frontend-jtech
+npm run dev
 ```
