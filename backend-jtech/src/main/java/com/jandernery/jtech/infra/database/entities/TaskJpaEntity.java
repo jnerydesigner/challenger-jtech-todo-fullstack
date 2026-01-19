@@ -24,9 +24,6 @@ public class TaskJpaEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
-    private String description;
-
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean completed = false;
 

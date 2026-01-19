@@ -6,9 +6,13 @@ import com.jandernery.jtech.domain.entities.TaskEntity;
 import java.util.UUID;
 
 public interface TaskRepository {
-    TaskEntity createTask(UUID userId, String title, String description);
+    BuildUserDTO createTask(UUID userId, String title);
 
     BuildUserDTO findAllTaskList(UUID userId);
 
     BuildUserDTO updateTaskStatus(UUID taskId, UUID userId);
+
+    BuildUserDTO updateTaskTitle(UUID taskId, String email, String title);
+
+    BuildUserDTO deleteTask(UUID taskId, String email);
 }

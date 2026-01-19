@@ -28,8 +28,7 @@ public class TaskRepositoryImpl implements TaskRepository {
 
     @Override
     @Transactional
-    public TaskEntity createTask(UUID userId, String title, String description) {
-        System.out.println(description);
+    public BuildUserDTO createTask(UUID userId, String title) {
         Optional<UserJpaEntity> userJpaEntity = userJpaRepository.findById(userId);
         if(userJpaEntity.isEmpty()){
             throw new IllegalArgumentException("User not found");
@@ -38,19 +37,25 @@ public class TaskRepositoryImpl implements TaskRepository {
         TaskEntity taskEntity = new TaskEntity();
         taskEntity.setUser(user);
         taskEntity.setTitle(title);
-        taskEntity.setDescription(description);
 
         TaskJpaEntity taskJpaEntity = TaskMapper.toPersistence(taskEntity);
         TaskJpaEntity taskJpaSave = taskJpaRepository.save(taskJpaEntity);
 
+        Optional<UserJpaEntity> build = userJpaRepository.findByIdWithTasks(userId);
 
-        return TaskMapper.toDomain(taskJpaSave);
+        if(build.isEmpty()){
+            throw new RuntimeException("Usuário não encontrado");
+        }
+
+        return UserMapper.toResponse(build.get());
     }
+
+
 
     @Override
     public BuildUserDTO findAllTaskList(UUID userId) {
         ModelMapper modelMapper = new ModelMapper();
-        List<TaskJpaEntity> taskJpaEntities = taskJpaRepository.findByUserId(userId);
+        Optional<List<TaskJpaEntity>> taskJpaEntities = taskJpaRepository.findByUserId(userId);
         if (taskJpaEntities.isEmpty()) {
             throw new RuntimeException("Usuário não encontrado");
         }
@@ -85,6 +90,70 @@ public class TaskRepositoryImpl implements TaskRepository {
         taskEntity.setCompleted(!taskEntity.isCompleted());
 
         taskJpaRepository.save(task.get());
+
+        return UserMapper.toResponse(user.get());
+    }
+
+    @Override
+    public BuildUserDTO updateTaskTitle(UUID taskId, String email, String title) {
+        Optional<UserJpaEntity> userJpaEntity = userJpaRepository.findByEmail(email);
+
+        if(userJpaEntity.isEmpty()){
+            throw new RuntimeException("Usuário não encontrado");
+        }
+
+        Optional<TaskJpaEntity> taskJpaEntity = taskJpaRepository.findById(taskId);
+
+        if(taskJpaEntity.isEmpty()){
+            throw new RuntimeException("Tarefa não encontrada");
+        }
+
+        taskJpaEntity.get().setTitle(title);
+        taskJpaRepository.save(taskJpaEntity.get());
+
+        Optional<UserJpaEntity> user = userJpaRepository.findByIdWithTasks(userJpaEntity.get().getId());
+
+        if(user.isEmpty()){
+            throw new RuntimeException("Usuário não encontrado");
+        }
+
+
+        return UserMapper.toResponse(user.get());
+    }
+
+    @Override
+    @Transactional
+    public BuildUserDTO deleteTask(UUID taskId, String email) {
+        UserJpaEntity user = findUserJpa(email);
+
+        Optional<TaskJpaEntity> task = taskJpaRepository.findById(taskId);
+
+        if(task.isEmpty()){
+            throw new RuntimeException("Tarefa não encontrada");
+        }
+
+        taskJpaRepository.delete(task.get());
+
+
+        return findTasksGeneral(user.getId());
+    }
+
+    private UserJpaEntity findUserJpa(String email){
+        Optional<UserJpaEntity> userJpaEntity = userJpaRepository.findByEmail(email);
+
+        if(userJpaEntity.isEmpty()){
+            throw new RuntimeException("Usuário não encontrado");
+        }
+
+        return userJpaEntity.get();
+    }
+
+    private BuildUserDTO findTasksGeneral(UUID userId){
+        Optional<UserJpaEntity> user = userJpaRepository.findByIdWithTasks(userId);
+
+        if(user.isEmpty()){
+            throw new RuntimeException("Tarefa não encontrada");
+        }
 
         return UserMapper.toResponse(user.get());
     }

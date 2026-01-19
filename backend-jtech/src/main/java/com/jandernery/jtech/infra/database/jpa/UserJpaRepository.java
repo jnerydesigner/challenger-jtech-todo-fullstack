@@ -16,8 +16,9 @@ public interface UserJpaRepository extends JpaRepository<UserJpaEntity, UUID> {
 
     @Query("""
         select u from UserJpaEntity u
-        left join fetch u.tasks
+        left join fetch u.tasks t
         where u.id =:id
+        order by t.title asc
     """)
     Optional<UserJpaEntity> findByIdWithTasks(UUID id);
 

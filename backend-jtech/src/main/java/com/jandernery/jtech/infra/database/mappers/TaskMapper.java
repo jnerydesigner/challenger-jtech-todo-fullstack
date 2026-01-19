@@ -16,7 +16,6 @@ public class TaskMapper {
         return TaskJpaEntity.builder()
                 .user(userJpaEntity)
                 .title(taskEntity.getTitle())
-                .description(taskEntity.getDescription())
                 .build();
     }
 
@@ -26,7 +25,6 @@ public class TaskMapper {
         return TaskEntity.builder()
                 .id(taskJpaEntity.getId())
                 .title(taskJpaEntity.getTitle())
-                .description(taskJpaEntity.getDescription())
                 .user(userEntity)
                 .createdAt(taskJpaEntity.getCreatedAt())
                 .updatedAt(taskJpaEntity.getUpdatedAt())

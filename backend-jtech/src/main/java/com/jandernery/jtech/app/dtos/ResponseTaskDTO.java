@@ -6,7 +6,6 @@ import java.util.UUID;
 public record ResponseTaskDTO(
         UUID id,
         String title,
-        String description,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         ResponseUserDTO user

@@ -48,7 +48,6 @@ public class UserMapper {
                         .map(task -> new BuildTaskDTO(
                                 task.getId(),
                                 task.getTitle(),
-                                task.getDescription(),
                                 task.isCompleted(),
                                 task.getCreatedAt(),
                                 task.getUpdatedAt()

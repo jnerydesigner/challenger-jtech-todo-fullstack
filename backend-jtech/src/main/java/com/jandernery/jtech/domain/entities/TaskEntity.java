@@ -13,7 +13,6 @@ import java.util.UUID;
 public class TaskEntity {
     private UUID id;
     private String title;
-    private String description;
     private boolean completed;
     private UserEntity user;
     private LocalDateTime createdAt;

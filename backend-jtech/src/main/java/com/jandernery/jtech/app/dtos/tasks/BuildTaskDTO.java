@@ -6,7 +6,6 @@ import java.util.UUID;
 public record BuildTaskDTO(
         UUID id,
         String title,
-        String description,
         boolean completed,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
