@@ -1,4 +1,4 @@
-import type { UserWithTasks } from "@/types/tasks.type";
+import type { TaskType, UserWithTasks } from "@/types/tasks.type";
 import { api } from "./api";
 
 export const tasksFindAll = async (): Promise<UserWithTasks> => {
@@ -23,5 +23,10 @@ export const updateTask = async (id: string, title: string): Promise<UserWithTas
 
 export const deleteTask = async (id: string): Promise<UserWithTasks> => {
   const { data } = await api.delete(`/tasks/${id}`);
+  return data;
+}
+
+export const findTaskById = async (id: string): Promise<TaskType> => {
+  const { data } = await api.get(`/tasks/${id}`);
   return data;
 }

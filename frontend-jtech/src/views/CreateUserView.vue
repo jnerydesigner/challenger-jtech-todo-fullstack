@@ -3,12 +3,20 @@
     <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
       <h2 class="text-2xl font-bold text-center mb-6">Task Manager</h2>
 
-      <form @submit.prevent="handleLogin" class="space-y-4">
+      <form @submit.prevent="handleCreateUser" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700">
             Email
           </label>
           <input v-model="email" type="email" required
+            class="mt-1 w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">
+            Nome
+          </label>
+          <input v-model="name" type="text" required
             class="mt-1 w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300" />
         </div>
 
@@ -20,6 +28,8 @@
             class="mt-1 w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-300" />
         </div>
 
+
+
         <button type="submit"
           class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           :disabled="loading">
@@ -29,13 +39,6 @@
         <p v-if="error" class="text-red-500 text-sm text-center">
           {{ error }}
         </p>
-
-        <span>
-          Ainda não tem uma conta?
-          <router-link to="/create-user" class="text-blue-600 hover:underline">
-            Cadastre-se
-          </router-link>
-        </span>
       </form>
     </div>
   </div>
@@ -44,38 +47,28 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user.store'
-import { login } from '@/services/login'
 import type { AxiosError } from 'axios'
+import { createUser } from '@/services/user'
 
 const router = useRouter()
-const userStore = useUserStore()
 
 const email = ref('')
 const password = ref('')
+const name = ref('')
 const loading = ref(false)
 const error = ref('')
 
-async function handleLogin() {
+async function handleCreateUser() {
   error.value = ''
   loading.value = true
 
   try {
-    const responseLogin = await login(email.value, password.value)
+    await createUser(name.value, email.value, password.value)
 
-    console.log('Login response:', responseLogin)
-    localStorage.setItem('user-login', JSON.stringify(responseLogin))
-
-    userStore.setUser({
-      id: responseLogin.id,
-      name: responseLogin.name,
-      email: responseLogin.email
-    })
-
-    router.push({ name: 'dashboard' })
+    router.push({ name: 'login' })
   } catch (e) {
     const errorObj = e as AxiosError
-    console.error('Erro no login:', errorObj)
+    console.error('Erro no cadastro:', errorObj)
 
     if (errorObj.response?.status === 401 || errorObj.response?.status === 403) {
       error.value = 'Email ou senha inválidos'

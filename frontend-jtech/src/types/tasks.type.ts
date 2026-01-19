@@ -1,15 +1,14 @@
 export interface UserWithTasks {
-    id: string
-    name: string
-    email: string
-    tasks: Task[]
+  id: string
+  name: string
+  email: string
+  tasks: TaskType[]
 }
 
-export interface Task {
-    id: string
-    title: string
-    description: string
-    completed: boolean
-    createdAt: string
-    updatedAt: string
+export interface TaskType {
+  id: string
+  title: string
+  completed: boolean
+  createdAt: string
+  updatedAt: string
 }

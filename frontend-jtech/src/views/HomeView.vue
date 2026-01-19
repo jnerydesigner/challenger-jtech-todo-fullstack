@@ -15,17 +15,26 @@
       <div v-for="task in taskStore.tasksComputed" :key="task.id" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
                rounded-xl shadow-sm hover:shadow-lg transition-all duration-300
                overflow-hidden">
-        <!-- Header do Card -->
         <div class="p-6 border-b border-gray-100 dark:border-gray-700">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
             {{ task.title }}
           </h3>
         </div>
 
-        <!-- Body do Card -->
         <div class="p-6 space-y-4">
-          <!-- Status Toggle -->
           <div class="flex items-center justify-between">
+
+
+            <button @click="openModalView(task)" class="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600
+                     text-white text-sm font-medium transition-colors duration-200
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                     flex items-center justify-center gap-2 cursor-pointer">
+              <span class="material-icons text-white">
+                visibility
+              </span>
+              <span>Ver Detalhes</span>
+            </button>
+
             <div class="flex items-center gap-2">
               <span class="text-sm font-medium"
                 :class="task.completed ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'">
@@ -35,7 +44,6 @@
             <ToggleSwitch v-model="task.completed" @update:modelValue="() => onToggle(task.id)" />
           </div>
 
-          <!-- Action Buttons -->
           <div class="flex gap-2">
             <button @click="openEditModal(task)" class="flex-1 px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600
                      text-white text-sm font-medium transition-colors duration-200
@@ -140,6 +148,32 @@
       </button>
     </template>
   </BaseModal>
+
+  <BaseModal :open="openViewModal" @close="openViewModal = false">
+
+    <div class="space-y-4">
+      <p class="text-gray-600">
+        {{ title }}
+      </p>
+
+
+      <span class="flex-1 px-4 py-2 rounded-lg text-white text-sm font-medium transition-colors duration-200
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                     flex items-center justify-center gap-2 cursor-pointer"
+        :class="status ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'">
+        <span class="material-icons text-base">
+          {{ status ? 'check_circle' : 'pause_circle' }}
+        </span>
+        {{ status ? 'Ativo' : 'Inativo' }}
+      </span>
+    </div>
+
+    <template #footer>
+      <button class="px-4 py-2 rounded-md bg-gray-200 cursor-pointer" @click="openViewModal = false">
+        Fechar
+      </button>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup lang="ts">
@@ -152,9 +186,11 @@ import BaseModal from '@/components/BaseModal.vue'
 const taskStore = useTaskStore()
 const openModal = ref(false)
 const openModalEdit = ref(false)
+const openViewModal = ref(false)
 const title = ref('')
 const titleOriginal = ref('')
 const editingTaskId = ref('')
+const status = ref(false)
 
 onMounted(async () => {
   try {
@@ -178,8 +214,13 @@ function openEditModal(task: any) {
   title.value = task.title
   titleOriginal.value = task.title
   editingTaskId.value = task.id
+}
 
-  console.log(titleOriginal)
+async function openModalView(task: any) {
+  console.log(task)
+  openViewModal.value = true
+  title.value = task.title
+  status.value = task.completed
 }
 
 async function deleteTask(id: string) {
